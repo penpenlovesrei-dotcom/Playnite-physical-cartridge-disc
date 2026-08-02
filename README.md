@@ -126,7 +126,10 @@ packages all three into distributable `.pext` files via Playnite's
 
 ## Credits
 
-Built by PenPen. SN Operator cartridge-reading protocol reverse-engineered
-from USB traffic captures — see the CartridgeShelf source for details.
-Playnite extension pattern based on the standard `GenericPlugin` /
-`GameLibrary` SDK.
+Built by PenPen, who has no programming background — the entire project
+(SN Operator protocol reverse-engineering, all three plugins, packaging,
+and this documentation) was built through conversations with
+[Claude](https://claude.ai), Anthropic's AI assistant. SN Operator
+cartridge-reading protocol reverse-engineered from USB traffic captures —
+see the CartridgeShelf source for details. Playnite extension pattern
+based on the standard `GenericPlugin` / `GameLibrary` SDK.
