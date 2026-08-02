@@ -33,6 +33,11 @@ Each extension works independently — you don't need all three.
 </p>
 
 <p align="center">
+  <img src="docs/images/disc_cart_loaded.png" width="800" alt="Disc and cartridge shelves showing an identified game"><br>
+  <em>DiscShelf and CartridgeShelf showing an identified game, ready to launch</em>
+</p>
+
+<p align="center">
   <img src="docs/images/desktop_details_panel.png" width="800" alt="Desktop mode details panel"><br>
   <em>Desktop mode: the game entry with its DigitalShelf library tag</em>
 </p>
