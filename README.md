@@ -15,6 +15,30 @@ Each extension works independently — you don't need all three.
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/three_shelves_overview.png" width="800" alt="The three shelves side by side in Fullscreen mode"><br>
+  <em>Digital, disc, and cartridge shelves side by side in Fullscreen mode</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/digital_library_titles.png" width="800" alt="Digital library populated with real cover art"><br>
+  <em>DigitalShelf's library tile, sitting next to the physical-media slot</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/setup_dialog.png" width="800" alt="CartridgeShelf launch setup dialog"><br>
+  <em>First-run prompt: choose Emulator + ROM, or a standalone executable</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/desktop_details_panel.png" width="800" alt="Desktop mode details panel"><br>
+  <em>Desktop mode: the game entry with its DigitalShelf library tag</em>
+</p>
+
+---
+
 ## How it works
 
 - **CartridgeShelf** talks to the SN Operator over a virtual serial port
