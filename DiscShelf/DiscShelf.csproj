@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{06DE629E-36B0-4D6D-9801-DD56A2E8AE77}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>DiscShelf</RootNamespace>
+    <AssemblyName>DiscShelf</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <!-- Comme CartridgeShelf : le projet vit directement dans le dossier
+         d'extension normal de Playnite (Extensions\DiscShelf\), sans
+         passer par le mécanisme "Extension de développement" de
+         config.json. La sortie de compilation va directement à la
+         racine du projet = là où Playnite lit extension.yaml + le dll. -->
+    <OutputPath>.\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="Playnite.SDK">
+      <HintPath>Playnite.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DiscShelfPlugin.cs" />
+    <Compile Include="Analyzer\DiscAnalyzer.cs" />
+    <Compile Include="Core\DiscFile.cs" />
+    <Compile Include="Core\DiscInfo.cs" />
+    <Compile Include="Core\DiscState.cs" />
+    <Compile Include="Core\GameIdentity.cs" />
+    <Compile Include="Core\PlatformId.cs" />
+    <Compile Include="Database\CsvParser.cs" />
+    <Compile Include="Database\DiscDatabase.cs" />
+    <Compile Include="Database\UserLibrary.cs" />
+    <Compile Include="Detectors\IDiscDetector.cs" />
+    <Compile Include="Detectors\PlaystationDetector.cs" />
+    <Compile Include="Detectors\PlayStation2Detector.cs" />
+    <Compile Include="Detectors\PlayStation3Detector.cs" />
+    <Compile Include="Detectors\ParamSfoReader.cs" />
+    <Compile Include="Detectors\SystemCnfReader.cs" />
+    <Compile Include="Detectors\Iso9660PvdReader.cs" />
+    <Compile Include="Detectors\RawSectorReader.cs" />
+    <Compile Include="Detectors\NeoGeoCdDetector.cs" />
+    <Compile Include="Detectors\SaturnDetector.cs" />
+    <Compile Include="Detectors\MegaCdDetector.cs" />
+    <Compile Include="Detectors\DreamcastDetector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\CoverDownloader.cs" />
+    <Compile Include="Services\DiscWatcher.cs" />
+    <Compile Include="Services\GameSlotManager.cs" />
+    <Compile Include="Services\PlatformResolver.cs" />
+    <Compile Include="Services\ScreenScraperClient.cs" />
+    <Compile Include="Services\ScreenScraperSystemIds.cs" />
+    <Compile Include="Services\LibretroThumbnailsClient.cs" />
+    <Compile Include="Services\LibretroThumbnailSystems.cs" />
+    <Compile Include="Services\SteamGridDbClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="extension.yaml" />
+    <None Include="Database\Playstation.csv" />
+    <None Include="Database\PlayStation2.csv" />
+    <None Include="Database\PlayStation3.txt" />
+    <None Include="Database\NeoGeoCD.csv" />
+    <None Include="Database\Saturn.csv" />
+    <None Include="Database\MegaCD.csv" />
+    <None Include="Database\Dreamcast.csv" />
+    <None Include="Database\UserLibrary.csv" />
+    <None Include="Database\ScreenScraperCredentials.csv" />
+    <None Include="Database\SteamGridDbCredentials.csv" />
+    <None Include="Assets\no_disc.png" Condition="Exists('Assets\no_disc.png')" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

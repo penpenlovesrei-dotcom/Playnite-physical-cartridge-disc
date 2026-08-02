@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F5A5F407-E921-49ED-9CDD-842E02CB9B7B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>CartridgeShelf</RootNamespace>
+    <AssemblyName>CartridgeShelf</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <!-- La sortie de compilation va directement a la racine du projet,
+         la ou Playnite attend CartridgeShelf.dll. C'est sans danger vis-a-vis
+         d'un Clean Solution : extension.yaml et les .csv sont declares en
+         None plus bas (pas Content), donc jamais consideres comme sortie de
+         build a nettoyer. -->
+    <OutputPath>.\</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="Playnite.SDK">
+      <HintPath>C:\Users\frede\AppData\Local\Playnite\Playnite.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CartridgeShelfPlugin.cs" />
+    <Compile Include="Core\CartridgeInfo.cs" />
+    <Compile Include="Core\CartridgeState.cs" />
+    <Compile Include="Core\GameIdentity.cs" />
+    <Compile Include="Core\PlatformId.cs" />
+    <Compile Include="Database\CsvParser.cs" />
+    <Compile Include="Database\CartridgeDatabase.cs" />
+    <Compile Include="Database\UserLibrary.cs" />
+    <Compile Include="Detectors\ICartridgeDetector.cs" />
+    <Compile Include="Detectors\SnOperatorDetector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\CoverDownloader.cs" />
+    <Compile Include="Services\CartridgeWatcher.cs" />
+    <Compile Include="Services\GameSlotManager.cs" />
+    <Compile Include="Services\PlatformResolver.cs" />
+    <Compile Include="Services\ScreenScraperClient.cs" />
+    <Compile Include="Services\ScreenScraperSystemIds.cs" />
+    <Compile Include="Services\LibretroThumbnailsClient.cs" />
+    <Compile Include="Services\LibretroThumbnailSystems.cs" />
+    <Compile Include="Services\SteamGridDbClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- None (pas Content) : ces fichiers vivent deja a leur emplacement
+         final (racine de l'extension), donc pas de copie de build a faire
+         dessus ; ca evite tout risque qu'un futur Clean les supprime. -->
+    <None Include="extension.yaml" />
+    <None Include="Database\Snes.csv" />
+    <None Include="Database\UserLibrary.csv" />
+    <None Include="Database\ScreenScraperCredentials.csv" />
+    <None Include="Database\SteamGridDbCredentials.csv" />
+    <None Include="Assets\no_cartridge.png" Condition="Exists('Assets\no_cartridge.png')" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

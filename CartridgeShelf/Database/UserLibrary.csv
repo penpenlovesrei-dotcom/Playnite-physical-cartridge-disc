@@ -1,0 +1,3 @@
+# Format : checksum;chemin_rom;chemin_emulateur;arguments (optionnel, {ROM} = chemin de la rom)
+# Exemple :
+# 9ea9;D:\ROMs\SNES\Contra Spirits.sfc;D:\Emulateurs\snes9x\snes9x-x64.exe;"{ROM}"

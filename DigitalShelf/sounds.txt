@@ -1,0 +1,28 @@
+# Sons joues par DigitalShelf.
+#
+# Les fichiers sont cherches dans le dossier audio du theme Fullscreen actif :
+#   ...\Playnite\Themes\Fullscreen\Nintendo PlayStation_...\audio
+#
+# Format : cle = nom du fichier. Une ligne par son.
+# Modifier puis relancer Playnite (pas de recompilation).
+#
+# IMPORTANT : uniquement des fichiers .wav. Les sons sont prechargees en
+# memoire pour partir sans delai, ce que le format MP3 ne permet pas.
+
+navigation = navigation.wav
+press      = Main Menu FX 1.wav
+open       = Main Menu FX 2.wav
+
+# ---------------------------------------------------------------------------
+# Candidats disponibles pour "navigation", du plus court au plus long :
+#
+#   navigationfffff.wav   tres bref
+#   navigation.wav        version courante du theme  (par defaut)
+#   navigationBAK.wav     version d'origine, plus longue
+#   cancel.wav
+#   menu_back.wav
+#   activationMUTE.wav
+#   activationBAK.wav     long
+#
+# Les .mp3 d'origine sont conserves dans le dossier audio ; les .wav
+# correspondants ont ete convertis a partir d'eux.

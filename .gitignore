@@ -1,0 +1,22 @@
+# Fichiers de build Visual Studio / MSBuild -- jamais dans le dépôt,
+# régénérés automatiquement à la compilation.
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+
+# Paquets NuGet restaurés -- récupérés automatiquement via packages.config,
+# pas besoin de les committer.
+**/packages/
+
+# Binaires compilés qui vivent directement à la racine des dossiers
+# d'extension (CartridgeShelf/DiscShelf/DigitalShelf compilent avec
+# OutputPath=".") -- ce sont des sorties de build, pas du code source.
+# Recompiler depuis les .cs suffit à les régénérer.
+*.dll
+*.pdb
+
+# Fichiers de build empaquetés localement (voir build-release.ps1) --
+# uniquement les .pext finaux dans les Releases GitHub, pas ce dossier.
+_release/

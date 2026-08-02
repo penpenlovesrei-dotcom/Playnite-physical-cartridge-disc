@@ -1,0 +1,3 @@
+# Format : serial;chemin_iso;chemin_emulateur;arguments (optionnel, {ISO} = chemin de l'iso)
+# Exemple :
+# SLPS_020.44;D:\ISOs\PS1\Einhander.bin;D:\Emulateurs\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe;-batch "{ISO}"

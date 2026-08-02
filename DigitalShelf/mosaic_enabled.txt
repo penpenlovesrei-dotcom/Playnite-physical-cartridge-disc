@@ -1,0 +1,20 @@
+Ce fichier active la transition mosaique facon Super Nintendo entre la vue
+console et la vue bibliotheque numerique.
+
+POUR DESACTIVER L'EFFET : supprimez (ou renommez) ce fichier.
+La bascule redevient alors immediate, sans recompiler ni redemarrer
+Playnite -- la presence du fichier est verifiee a chaque bascule.
+
+L'effet ne couvre que la zone centrale : les bandeaux blancs du haut et du
+bas restent nets.
+
+Reglages dans Services\MosaicTransition.cs :
+  MinFactor       pixelisation de depart (2)
+  MaxFactor       pixelisation maximale (28 = carres de 56 px a l'ecran)
+  PhaseDurationMs duree de chaque moitie de l'animation (320)
+  SwitchHoldMs    attente au maximum de pixelisation apres la bascule (220),
+                  le temps que Playnite charge les jaquettes de la nouvelle
+                  vue ; a augmenter si des emplacements vides apparaissent
+  CaptureScale    resolution de la capture (0.5)
+  TopBarHeight    hauteur du bandeau haut exclu de l'effet (100)
+  BottomBarHeight hauteur du bandeau bas exclu de l'effet (100)
