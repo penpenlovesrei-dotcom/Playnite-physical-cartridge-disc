@@ -1,0 +1,10 @@
+AddonId: 7c3e2d1a-9f61-4c7d-8b4e-123456789abc
+Packages:
+  - Version: 0.2
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-02
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.1/DiscShelf-v0.2.pext
+    Changelog:
+      - Identification des disques physiques (PlayStation, PlayStation 2, Saturn, Dreamcast, Mega-CD, Neo Geo CD) insérés dans un lecteur optique.
+      - Récupération de jaquette via ScreenScraper / libretro-thumbnails / SteamGridDB.
+      - Configuration de l'émulateur et de l'ISO directement depuis Playnite.

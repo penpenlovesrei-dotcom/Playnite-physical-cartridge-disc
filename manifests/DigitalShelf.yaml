@@ -1,0 +1,10 @@
+AddonId: f7ba5ce6-190b-47ed-ba0c-59928375d2a1
+Packages:
+  - Version: 0.1
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-02
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.1/DigitalShelf-v0.1.pext
+    Changelog:
+      - Version initiale : troisième tuile pour la bibliothèque numérique, aux côtés de DiscShelf et CartridgeShelf.
+      - Transition mosaïque façon Super Nintendo entre la vue console et la vue bibliothèque.
+      - Sons de navigation configurables.
