@@ -17,6 +17,8 @@
 *.dll
 *.pdb
 
-# Fichiers de build empaquetés localement (voir build-release.ps1) --
-# uniquement les .pext finaux dans les Releases GitHub, pas ce dossier.
-_release/
+# Sorties de l'empaquetage local (voir _release/build-release.ps1) : les .pext
+# ne vivent que dans les Releases GitHub. Le script et les manifestes de
+# soumission à l'annuaire Playnite, eux, sont du code source et sont suivis.
+_release/staging/
+_release/output/
