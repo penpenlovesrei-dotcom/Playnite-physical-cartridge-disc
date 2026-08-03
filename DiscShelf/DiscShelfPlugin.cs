@@ -72,6 +72,7 @@ namespace DiscShelf
                 InitializeDetectors();
                 InitializeDatabases();
                 InitializeSlotManager();
+                InitializeUriHandler();
                 InitializeWatcher();
             }
             catch (Exception ex)
@@ -212,6 +213,81 @@ namespace DiscShelf
             // Affiche tout de suite un état par défaut ; sera corrigé dès
             // que le watcher aura évalué l'état réel du lecteur.
             slotManager.ShowNoDisc();
+        }
+
+
+        /// <summary>
+        /// Rend le configurateur atteignable depuis la tuile elle-même, via
+        /// l'action de lancement posée par GameSlotManager sur un disque non
+        /// configuré. Sans cela, le seul moyen de configurer un jeu est de
+        /// retirer puis réinsérer le disque pendant la session : un disque
+        /// déjà présent au démarrage de Playnite, ou dont la configuration a
+        /// été annulée une fois, restait inatteignable.
+        /// </summary>
+        private void InitializeUriHandler()
+        {
+            PlayniteApi.UriHandler.RegisterSource("discshelf", args =>
+            {
+                try
+                {
+                    // playnite://discshelf/configure/<serial>
+                    if (args.Arguments == null ||
+                        args.Arguments.Length < 2 ||
+                        !string.Equals(args.Arguments[0], "configure", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+
+                    ConfigureFromUri(args.Arguments[1]);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "DiscShelf : erreur pendant le traitement de l'URI.");
+                }
+            });
+        }
+
+
+        /// <summary>
+        /// Configure le disque désigné par son serial, puis rafraîchit la
+        /// tuile pour qu'elle devienne immédiatement jouable.
+        /// </summary>
+        private void ConfigureFromUri(string serial)
+        {
+            DiscEntry entry = discDatabase.Find(serial);
+
+            if (entry == null)
+            {
+                logger.Info($"DiscShelf : URI de configuration pour un serial inconnu ({serial}).");
+
+                return;
+            }
+
+            GameIdentity identity = new GameIdentity
+            {
+                Serial = serial,
+                Platform = string.Equals(serial, DiscState.CurrentSerial, StringComparison.OrdinalIgnoreCase)
+                    ? DiscState.CurrentPlatform
+                    : PlatformId.Unknown
+            };
+
+            // Une annulation precedente ne doit pas bloquer une demande
+            // explicite de l'utilisateur.
+            declinedEmulatorSetup.Remove(serial);
+
+            // Meme precaution que pour le prompt d'insertion : les dialogues
+            // exigent le thread UI.
+            RunOnUiThread(() =>
+            {
+                UserLibraryEntry result = PromptForEmulatorSetup(identity, entry.Title);
+
+                if (result == null)
+                {
+                    declinedEmulatorSetup.Add(serial);
+                }
+
+                slotManager.ShowGame(identity, entry, result);
+            });
         }
 
 

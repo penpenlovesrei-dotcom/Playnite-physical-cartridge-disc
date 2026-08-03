@@ -76,6 +76,7 @@ namespace CartridgeShelf
                 InitializeDetectors();
                 InitializeDatabases();
                 InitializeSlotManager();
+                InitializeUriHandler();
                 InitializeWatcher();
             }
             catch (Exception ex)
@@ -181,6 +182,81 @@ namespace CartridgeShelf
             );
 
             slotManager.ShowNoCartridge();
+        }
+
+
+        /// <summary>
+        /// Rend le configurateur atteignable depuis la tuile elle-même, via
+        /// l'action de lancement posée par GameSlotManager sur une cartouche
+        /// non configurée. Sans cela, le seul moyen de configurer un jeu est
+        /// de retirer puis réinsérer la cartouche pendant la session : une
+        /// cartouche déjà présente au démarrage de Playnite, ou dont la
+        /// configuration a été annulée une fois, restait inatteignable.
+        /// </summary>
+        private void InitializeUriHandler()
+        {
+            PlayniteApi.UriHandler.RegisterSource("cartridgeshelf", args =>
+            {
+                try
+                {
+                    // playnite://cartridgeshelf/configure/<checksum>
+                    if (args.Arguments == null ||
+                        args.Arguments.Length < 2 ||
+                        !string.Equals(args.Arguments[0], "configure", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+
+                    ConfigureFromUri(args.Arguments[1]);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "CartridgeShelf : erreur pendant le traitement de l'URI.");
+                }
+            });
+        }
+
+
+        /// <summary>
+        /// Configure la cartouche désignée par son checksum, puis rafraîchit
+        /// la tuile pour qu'elle devienne immédiatement jouable.
+        /// </summary>
+        private void ConfigureFromUri(string checksum)
+        {
+            CartridgeEntry entry = cartridgeDatabase.Find(checksum);
+
+            if (entry == null)
+            {
+                logger.Info($"CartridgeShelf : URI de configuration pour un checksum inconnu ({checksum}).");
+
+                return;
+            }
+
+            GameIdentity identity = new GameIdentity
+            {
+                Checksum = checksum,
+                Platform = string.Equals(checksum, CartridgeState.CurrentChecksum, StringComparison.OrdinalIgnoreCase)
+                    ? CartridgeState.CurrentPlatform
+                    : PlatformId.SuperNintendo
+            };
+
+            // Une annulation precedente ne doit pas bloquer une demande
+            // explicite de l'utilisateur.
+            declinedEmulatorSetup.Remove(checksum);
+
+            // Meme precaution que pour le prompt d'insertion : les dialogues
+            // exigent le thread UI.
+            RunOnUiThread(() =>
+            {
+                UserLibraryEntry result = PromptForEmulatorSetup(identity, entry.Title);
+
+                if (result == null)
+                {
+                    declinedEmulatorSetup.Add(checksum);
+                }
+
+                slotManager.ShowGame(identity, entry, result);
+            });
         }
 
 

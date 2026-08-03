@@ -22,6 +22,19 @@ namespace CartridgeShelf.Services
     {
         private const string SlotGameId = "CARTRIDGESHELF_SLOT";
 
+        /// <summary>
+        /// URI ouvrant le configurateur pour un checksum donné. Sert d'action
+        /// de lancement quand la cartouche n'est pas encore configurée.
+        ///
+        /// Pourquoi passer par une URI : sans action de lancement, le jeu est
+        /// "non installé", le thème propose donc "Installer", et Playnite
+        /// reclame alors un InstallController au plugin proprietaire. Or un
+        /// GenericPlugin ne peut pas en fournir -- seul un plugin de
+        /// bibliotheque le peut -- d'ou "Fonction d'installation introuvable".
+        /// On ne laisse donc jamais le jeu dans cet etat.
+        /// </summary>
+        public const string ConfigureUriFormat = "playnite://cartridgeshelf/configure/{0}";
+
         // "!1" : place la jaquette cartouche en dernier des trois, derrière
         // la tuile DigitalShelf ("!!") et la jaquette CD ("!0"). Ordre voulu
         // dans le thème Fullscreen : bibliothèque numérique, CD, cartouche.
@@ -125,12 +138,24 @@ namespace CartridgeShelf.Services
             else
             {
                 logger.Info(
-                    $"GameSlotManager : pas d'entrée UserLibrary (ou émulateur introuvable) pour {identity.Checksum}, jeu affiché sans action de lancement."
+                    $"GameSlotManager : pas d'entrée UserLibrary (ou émulateur introuvable) pour {identity.Checksum}, action de configuration proposée."
                 );
+
+                actions.Add(new GameAction
+                {
+                    Name = "Configurer l'émulateur",
+                    Type = GameActionType.URL,
+                    Path = string.Format(ConfigureUriFormat, identity.Checksum),
+                    IsPlayAction = true
+                });
             }
 
             game.GameActions = actions;
-            game.IsInstalled = actions.Count > 0;
+
+            // Toujours "installé" : le jeu porte soit son action de lancement,
+            // soit celle de configuration. Le voir passer a false rendrait la
+            // main a Playnite, qui chercherait un InstallController inexistant.
+            game.IsInstalled = true;
 
             api.Database.Games.Update(game);
 
