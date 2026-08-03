@@ -19,15 +19,29 @@ namespace CartridgeShelf.Database
         /// <summary>
         /// Arguments passés à l'émulateur. Le jeton {ROM} est remplacé
         /// par le chemin du fichier ROM, entouré de guillemets.
+        /// Le gabarit stocké ne porte donc pas les guillemets lui-même :
+        /// pour CsvParser, le guillemet délimite un champ et disparaît à
+        /// la relecture. Un gabarit qui en contient malgré tout (fichier
+        /// écrit à la main, entrée d'une version antérieure) reste accepté.
         /// </summary>
         public string ArgumentsTemplate { get; set; }
 
 
         public string BuildArguments()
         {
-            string template = ArgumentsTemplate ?? "\"{ROM}\"";
+            string template = ArgumentsTemplate ?? "{ROM}";
 
-            return template.Replace("{ROM}", RomPath);
+            return template
+                .Replace("\"{ROM}\"", "{ROM}")
+                .Replace("{ROM}", QuotePath(RomPath));
+        }
+
+
+        private static string QuotePath(string path)
+        {
+            return string.IsNullOrEmpty(path)
+                ? string.Empty
+                : "\"" + path + "\"";
         }
     }
 
@@ -92,7 +106,7 @@ namespace CartridgeShelf.Database
                     Checksum = checksum,
                     RomPath = record[1].Trim(),
                     EmulatorPath = record[2].Trim(),
-                    ArgumentsTemplate = record.Length > 3 ? record[3].Trim() : "\"{ROM}\""
+                    ArgumentsTemplate = record.Length > 3 ? record[3].Trim() : "{ROM}"
                 };
 
                 byChecksum[checksum] = entry;

@@ -1,3 +1,5 @@
 # Format : serial;chemin_iso;chemin_emulateur;arguments (optionnel, {ISO} = chemin de l'iso)
+# {ISO} est remplace par le chemin DEJA entoure de guillemets : ne pas en
+# ajouter autour du jeton, le guillemet delimite un champ CSV et serait perdu.
 # Exemple :
-# SLPS_020.44;D:\ISOs\PS1\Einhander.bin;D:\Emulateurs\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe;-batch "{ISO}"
+# SLPS_020.44;D:\ISOs\PS1\Einhander.bin;D:\Emulateurs\DuckStation\duckstation-qt-x64-ReleaseLTCG.exe;-batch {ISO}

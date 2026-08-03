@@ -17,17 +17,30 @@ namespace DiscShelf.Database
 
         /// <summary>
         /// Arguments passés à l'émulateur. Le jeton {ISO} est remplacé
-        /// par le chemin de l'image, entouré de guillemets.
-        /// Ex. : -batch "{ISO}"
+        /// par le chemin de l'image, entouré de guillemets. Ex. : -batch {ISO}
+        /// Le gabarit stocké ne porte donc pas les guillemets lui-même :
+        /// pour CsvParser, le guillemet délimite un champ et disparaît à
+        /// la relecture. Un gabarit qui en contient malgré tout (fichier
+        /// écrit à la main, entrée d'une version antérieure) reste accepté.
         /// </summary>
         public string ArgumentsTemplate { get; set; }
 
 
         public string BuildArguments()
         {
-            string template = ArgumentsTemplate ?? "\"{ISO}\"";
+            string template = ArgumentsTemplate ?? "{ISO}";
 
-            return template.Replace("{ISO}", IsoPath);
+            return template
+                .Replace("\"{ISO}\"", "{ISO}")
+                .Replace("{ISO}", QuotePath(IsoPath));
+        }
+
+
+        private static string QuotePath(string path)
+        {
+            return string.IsNullOrEmpty(path)
+                ? string.Empty
+                : "\"" + path + "\"";
         }
     }
 
@@ -92,7 +105,7 @@ namespace DiscShelf.Database
                     Serial = serial,
                     IsoPath = record[1].Trim(),
                     EmulatorPath = record[2].Trim(),
-                    ArgumentsTemplate = record.Length > 3 ? record[3].Trim() : "\"{ISO}\""
+                    ArgumentsTemplate = record.Length > 3 ? record[3].Trim() : "{ISO}"
                 };
 
                 bySerial[serial] = entry;

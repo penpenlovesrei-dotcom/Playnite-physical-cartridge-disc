@@ -75,18 +75,39 @@
   <!-- Playnite charge l'extension depuis le dossier utilisateur (Roaming),
        nomme d'apres l'Id du plugin, et NON depuis ce dossier-ci. Sans cette
        copie, le binaire charge peut rester perime sans qu'aucune erreur ne
-       le signale. -->
+       le signale.
+       On redeploie l'extension ENTIERE, pas seulement l'assembly : tout
+       fichier omis ici reste fige a sa version du jour de l'installation.
+       C'est ce qui est arrive a extension.yaml, qui annoncait encore 0.1
+       dans le journal de Playnite pendant que la DLL executee etait celle
+       de 0.2. -->
   <Target Name="CopyToPlayniteUserExtensions" AfterTargets="Build">
     <PropertyGroup>
       <PlayniteUserExtension>$(AppData)\Playnite\Extensions\a1312fcb-7107-4168-95ba-181dd6069299</PlayniteUserExtension>
     </PropertyGroup>
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+    <ItemGroup>
+      <DeployRoot Include="extension.yaml" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).dll" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+      <DeployDatabase Include="Database\*.csv;Database\*.txt" />
+      <!-- Etat de l'utilisateur, jamais ecrase par une compilation : les
+           cles d'API qu'il a saisies, et le gabarit de bibliotheque perso
+           (ses vraies donnees vivent dans ExtensionsData). -->
+      <DeployDatabase Remove="Database\*Credentials.csv" />
+      <DeployDatabase Remove="Database\UserLibrary.csv" />
+      <DeployAssets Include="Assets\*.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployRoot)"
           DestinationFolder="$(PlayniteUserExtension)"
           Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
-          DestinationFolder="$(PlayniteUserExtension)"
-          Condition="Exists('$(PlayniteUserExtension)') And Exists('$(OutputPath)$(AssemblyName).pdb')"
+    <Copy SourceFiles="@(DeployDatabase)"
+          DestinationFolder="$(PlayniteUserExtension)\Database"
+          Condition="Exists('$(PlayniteUserExtension)')"
+          ContinueOnError="true" />
+    <Copy SourceFiles="@(DeployAssets)"
+          DestinationFolder="$(PlayniteUserExtension)\Assets"
+          Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
   </Target>
 </Project>

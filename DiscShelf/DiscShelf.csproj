@@ -94,13 +94,29 @@
     <PropertyGroup>
       <PlayniteUserExtension>$(AppData)\Playnite\Extensions\7c3e2d1a-9f61-4c7d-8b4e-123456789abc</PlayniteUserExtension>
     </PropertyGroup>
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+    <ItemGroup>
+      <DeployRoot Include="extension.yaml" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).dll" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+      <DeployDatabase Include="Database\*.csv;Database\*.txt" />
+      <!-- Etat de l'utilisateur, jamais ecrase par une compilation : les
+           cles d'API qu'il a saisies, et le gabarit de bibliotheque perso
+           (ses vraies donnees vivent dans ExtensionsData). -->
+      <DeployDatabase Remove="Database\*Credentials.csv" />
+      <DeployDatabase Remove="Database\UserLibrary.csv" />
+      <DeployAssets Include="Assets\*.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployRoot)"
           DestinationFolder="$(PlayniteUserExtension)"
           Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
-          DestinationFolder="$(PlayniteUserExtension)"
-          Condition="Exists('$(PlayniteUserExtension)') And Exists('$(OutputPath)$(AssemblyName).pdb')"
+    <Copy SourceFiles="@(DeployDatabase)"
+          DestinationFolder="$(PlayniteUserExtension)\Database"
+          Condition="Exists('$(PlayniteUserExtension)')"
+          ContinueOnError="true" />
+    <Copy SourceFiles="@(DeployAssets)"
+          DestinationFolder="$(PlayniteUserExtension)\Assets"
+          Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
   </Target>
 </Project>

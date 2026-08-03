@@ -542,7 +542,7 @@ namespace DiscShelf
                 Serial = identity.Serial,
                 IsoPath = isoPath,
                 EmulatorPath = emulatorPath,
-                ArgumentsTemplate = "\"{ISO}\""
+                ArgumentsTemplate = "{ISO}"
             };
 
             userLibrary.Add(entry);

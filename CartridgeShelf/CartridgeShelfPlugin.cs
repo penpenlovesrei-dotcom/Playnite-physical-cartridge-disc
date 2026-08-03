@@ -572,7 +572,7 @@ namespace CartridgeShelf
                 Checksum = identity.Checksum,
                 RomPath = romPath,
                 EmulatorPath = emulatorPath,
-                ArgumentsTemplate = "\"{ROM}\""
+                ArgumentsTemplate = "{ROM}"
             };
 
             userLibrary.Add(entry);

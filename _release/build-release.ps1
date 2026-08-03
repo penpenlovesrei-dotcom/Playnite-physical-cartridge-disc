@@ -14,10 +14,18 @@
 
 $ErrorActionPreference = "Stop"
 
-$root        = "C:\Users\frede\AppData\Local\Playnite\Extensions"
-$stagingRoot = "C:\Users\frede\Documents\GitHub\Playnite-physical-cartridge-disc\_release\staging"
-$outputDir   = "C:\Users\frede\Documents\GitHub\Playnite-physical-cartridge-disc\_release\output"
-$toolbox     = "C:\Users\frede\AppData\Local\Playnite\Toolbox.exe"
+# On empaquette depuis le DEPOT, seule source a jour.
+#
+# Ce script lisait auparavant C:\Users\...\AppData\Local\Playnite\Extensions,
+# qui est le dossier programme de Playnite : aucune compilation ne l'alimente
+# et Playnite ne le charge meme pas (le journal montre qu'il charge la copie
+# Roaming). Il y dormait donc une DLL vieille de 19 h, de taille identique a
+# l'octet pres -- seule la date la trahissait. Un .pext construit depuis la
+# a toutes les chances d'embarquer du code perime sans le moindre avertissement.
+$repoRoot    = Split-Path $PSScriptRoot -Parent
+$stagingRoot = Join-Path $PSScriptRoot "staging"
+$outputDir   = Join-Path $PSScriptRoot "output"
+$toolbox     = "$env:LOCALAPPDATA\Playnite\Toolbox.exe"
 
 function New-CleanDir($path) {
     if (Test-Path $path) { Remove-Item $path -Recurse -Force }
@@ -59,7 +67,7 @@ if (-not (Test-Path $outputDir)) { New-Item -ItemType Directory -Path $outputDir
 # CartridgeShelf
 # ============================================================
 Write-Host "`n=== CartridgeShelf ===" -ForegroundColor Cyan
-$src = "$root\CartridgeShelf"
+$src = "$repoRoot\CartridgeShelf"
 $dst = "$stagingRoot\CartridgeShelf"
 New-CleanDir $dst
 New-CleanDir "$dst\Database"
@@ -81,7 +89,7 @@ Rename-Package "a1312fcb-7107-4168-95ba-181dd6069299" "CartridgeShelf" (Get-Exte
 # DiscShelf
 # ============================================================
 Write-Host "`n=== DiscShelf ===" -ForegroundColor Cyan
-$src = "$root\DiscShelf"
+$src = "$repoRoot\DiscShelf"
 $dst = "$stagingRoot\DiscShelf"
 New-CleanDir $dst
 New-CleanDir "$dst\Database"
@@ -107,7 +115,7 @@ Rename-Package "7c3e2d1a-9f61-4c7d-8b4e-123456789abc" "DiscShelf" (Get-Extension
 # DigitalShelf
 # ============================================================
 Write-Host "`n=== DigitalShelf ===" -ForegroundColor Cyan
-$src = "$root\DigitalShelf"
+$src = "$repoRoot\DigitalShelf"
 $dst = "$stagingRoot\DigitalShelf"
 New-CleanDir $dst
 New-CleanDir "$dst\Assets"
@@ -126,3 +134,4 @@ Rename-Package "f7ba5ce6-190b-47ed-ba0c-59928375d2a1" "DigitalShelf" (Get-Extens
 Write-Host "`n=== Terminé ===" -ForegroundColor Green
 Write-Host "Fichiers .pext générés dans : $outputDir"
 Get-ChildItem $outputDir -Filter *.pext | Format-Table Name, Length
+

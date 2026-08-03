@@ -1,3 +1,5 @@
 # Format : checksum;chemin_rom;chemin_emulateur;arguments (optionnel, {ROM} = chemin de la rom)
+# {ROM} est remplace par le chemin DEJA entoure de guillemets : ne pas en
+# ajouter autour du jeton, le guillemet delimite un champ CSV et serait perdu.
 # Exemple :
-# 9ea9;D:\ROMs\SNES\Contra Spirits.sfc;D:\Emulateurs\snes9x\snes9x-x64.exe;"{ROM}"
+# 9ea9;D:\ROMs\SNES\Contra Spirits.sfc;D:\Emulateurs\snes9x\snes9x-x64.exe;{ROM}

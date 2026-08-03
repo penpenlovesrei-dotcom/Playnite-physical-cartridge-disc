@@ -58,13 +58,22 @@
     <PropertyGroup>
       <PlayniteUserExtension>$(AppData)\Playnite\Extensions\f7ba5ce6-190b-47ed-ba0c-59928375d2a1</PlayniteUserExtension>
     </PropertyGroup>
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+    <ItemGroup>
+      <DeployRoot Include="extension.yaml" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).dll" />
+      <DeployRoot Include="$(OutputPath)$(AssemblyName).pdb" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+      <DeployAssets Include="Assets\*.png" />
+    </ItemGroup>
+    <!-- mosaic_enabled.txt et sounds.txt ne sont volontairement PAS
+         redeployes : ce sont des reglages que l'utilisateur modifie ou
+         supprime a la main, une compilation ne doit pas les retablir. -->
+    <Copy SourceFiles="@(DeployRoot)"
           DestinationFolder="$(PlayniteUserExtension)"
           Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
-          DestinationFolder="$(PlayniteUserExtension)"
-          Condition="Exists('$(PlayniteUserExtension)') And Exists('$(OutputPath)$(AssemblyName).pdb')"
+    <Copy SourceFiles="@(DeployAssets)"
+          DestinationFolder="$(PlayniteUserExtension)\Assets"
+          Condition="Exists('$(PlayniteUserExtension)')"
           ContinueOnError="true" />
   </Target>
 </Project>
