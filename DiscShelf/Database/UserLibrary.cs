@@ -116,5 +116,20 @@ namespace DiscShelf.Database
 
             return entry;
         }
+
+
+        /// <summary>
+        /// Ajoute/remplace une entrée en mémoire (utilisé par le
+        /// configurateur interactif). L'appelant gère la persistance.
+        /// </summary>
+        public void Add(UserLibraryEntry entry)
+        {
+            if (entry == null || string.IsNullOrWhiteSpace(entry.Serial))
+            {
+                return;
+            }
+
+            bySerial[entry.Serial.Trim()] = entry;
+        }
     }
 }

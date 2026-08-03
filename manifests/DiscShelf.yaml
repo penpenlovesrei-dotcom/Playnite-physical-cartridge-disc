@@ -1,5 +1,15 @@
 AddonId: 7c3e2d1a-9f61-4c7d-8b4e-123456789abc
 Packages:
+  - Version: 0.3
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-03
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.3/DiscShelf-v0.3.pext
+    Changelog:
+      - Configuration interactive de l'émulateur et de l'ISO à l'insertion d'un disque inconnu, portée depuis CartridgeShelf.
+      - Correction - les boîtes de dialogue étaient créées depuis le thread de surveillance du lecteur, où elles échouaient sans lever d'erreur ; elles sont désormais exécutées sur le thread d'interface.
+      - Aucune sollicitation pendant le démarrage de Playnite, ni relance pour un disque dont la configuration vient d'être annulée.
+      - Base PlayStation portée à 10 641 titres (conversion complète de redump.org).
+      - Jaquettes récupérées via libretro-thumbnails puis SteamGridDB ; ScreenScraper abandonné car il exigeait un compte.
   - Version: 0.2
     RequiredApiVersion: 6.16.0
     ReleaseDate: 2026-08-02

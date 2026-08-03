@@ -1,5 +1,15 @@
 AddonId: f7ba5ce6-190b-47ed-ba0c-59928375d2a1
 Packages:
+  - Version: 0.2
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-03
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.2/DigitalShelf-v0.2.pext
+    Changelog:
+      - La tuile passe en première position, ce qui la resélectionne automatiquement au retour de la bibliothèque numérique.
+      - Transition mosaïque - animation calée sur le rafraîchissement de l'écran, bandeaux du thème préservés, temps d'attente après la bascule pour laisser les jaquettes se charger.
+      - Effet désactivable en supprimant le fichier mosaic_enabled.txt, sans recompilation.
+      - Sons de navigation et de transition choisis dans sounds.txt, sans recompilation.
+      - La vue console est imposée au démarrage et réaffirmée après un import de bibliothèque, ce qui évite de voir les jeux Steam mélangés aux trois jaquettes au premier lancement.
   - Version: 0.1
     RequiredApiVersion: 6.16.0
     ReleaseDate: 2026-08-02

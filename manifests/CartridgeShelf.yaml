@@ -1,5 +1,12 @@
 AddonId: a1312fcb-7107-4168-95ba-181dd6069299
 Packages:
+  - Version: 0.2
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-03
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.2/CartridgeShelf-v0.2.pext
+    Changelog:
+      - Correction - les boîtes de dialogue de configuration de l'émulateur étaient créées depuis le thread de surveillance du lecteur, où elles échouaient sans lever d'erreur ; elles sont désormais exécutées sur le thread d'interface.
+      - Ordre d'affichage - la jaquette cartouche passe en dernière position, à la suite du disque et de la bibliothèque numérique.
   - Version: 0.1
     RequiredApiVersion: 6.16.0
     ReleaseDate: 2026-08-02

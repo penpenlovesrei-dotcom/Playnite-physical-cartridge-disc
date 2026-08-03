@@ -31,10 +31,23 @@ namespace DiscShelf
 
         private UserLibrary userLibrary;
 
+        private string userLibraryPath;
+
         private GameSlotManager slotManager;
+
+        private readonly HashSet<string> declinedEmulatorSetup =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private readonly List<IDiscDetector> detectors =
             new List<IDiscDetector>();
+
+        // Vrai seulement pour la toute première évaluation d'état au
+        // démarrage (voir TryStartWatcher -> CheckNow, appelé sur le
+        // thread UI pendant OnApplicationStarted). À ce moment-là, jamais
+        // de dialogue bloquant (SelectFile, ShowMessage...) qui
+        // interromprait le démarrage de Playnite -- même comportement que
+        // CartridgeShelf. Repasse à false dès le premier événement traité.
+        private bool isStartupCheck = true;
 
 
         public override Guid Id =>
@@ -145,7 +158,7 @@ namespace DiscShelf
             // La bibliothèque perso vit dans le dossier de données utilisateur
             // du plugin (persistant entre mises à jour), pas dans le dossier
             // d'installation.
-            string userLibraryPath = Path.Combine(GetPluginUserDataPath(), "UserLibrary.csv");
+            userLibraryPath = Path.Combine(GetPluginUserDataPath(), "UserLibrary.csv");
 
             if (!File.Exists(userLibraryPath))
             {
@@ -291,6 +304,9 @@ namespace DiscShelf
         {
             try
             {
+                bool isStartup = isStartupCheck;
+                isStartupCheck = false;
+
                 string drivePath = watcher.CurrentDrive + "\\";
 
                 DiscAnalyzer analyzer = new DiscAnalyzer();
@@ -364,6 +380,37 @@ namespace DiscShelf
 
                 UserLibraryEntry userEntry = userLibrary.Find(identity.Serial);
 
+                if (userEntry == null && !isStartup && !declinedEmulatorSetup.Contains(identity.Serial))
+                {
+                    // Important : les dialogues WPF (ShowMessage, SelectFile)
+                    // exigent le thread UI (STA). OnDiscInserted tourne sur
+                    // le thread d'arrière-plan du watcher -- sans ce
+                    // marshaling, les dialogues échouent silencieusement
+                    // (pas d'exception, retour immédiat comme si annulés).
+                    RunOnUiThread(() =>
+                    {
+                        UserLibraryEntry promptResult = PromptForEmulatorSetup(identity, entry.Title);
+
+                        if (promptResult == null)
+                        {
+                            // L'utilisateur a annulé l'un des sélecteurs de
+                            // fichier -- on ne redemande plus pour ce disque
+                            // pendant le reste de la session, pour ne pas
+                            // harceler à chaque insertion.
+                            declinedEmulatorSetup.Add(identity.Serial);
+                        }
+
+                        DiscState.DiscInserted = true;
+                        DiscState.CurrentTitle = entry.Title;
+                        DiscState.CurrentSerial = identity.Serial;
+                        DiscState.CurrentPlatform = identity.Platform;
+
+                        slotManager.ShowGame(identity, entry, promptResult);
+                    });
+
+                    return;
+                }
+
                 DiscState.DiscInserted = true;
                 DiscState.CurrentTitle = entry.Title;
                 DiscState.CurrentSerial = identity.Serial;
@@ -374,6 +421,165 @@ namespace DiscShelf
             catch (Exception ex)
             {
                 logger.Error(ex, "DiscShelf : erreur pendant l'analyse du disque inséré.");
+            }
+        }
+
+
+        /// <summary>
+        /// Propose, via une question Oui/Non (ChooseItemWithSearch n'étant
+        /// disponible qu'en mode Desktop d'après le SDK Playnite), le choix
+        /// entre émulateur+ISO et exécutable autonome. Enregistre le
+        /// résultat dans UserLibrary.csv et le retourne, ou null si
+        /// l'utilisateur annule l'une des sélections. Même logique que
+        /// CartridgeShelf.PromptForEmulatorSetup, adaptée pour les ISO.
+        /// </summary>
+        private UserLibraryEntry PromptForEmulatorSetup(GameIdentity identity, string title)
+        {
+            try
+            {
+                MessageBoxResult choice = PlayniteApi.Dialogs.ShowMessage(
+                    $"\"{title}\" was just identified.\n\n"
+                    + "Does this game use a separate emulator and disc image (ISO/BIN/CUE)? "
+                    + "(Yes = Emulator + disc image, No = single standalone executable / native PC game)",
+                    "DiscShelf: set up launching",
+                    MessageBoxButton.YesNo
+                );
+
+                if (choice == MessageBoxResult.Yes)
+                {
+                    return PromptForEmulatorAndIso(identity, title);
+                }
+
+                return PromptForStandaloneExecutable(identity, title);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "DiscShelf : erreur pendant la configuration de l'émulateur.");
+
+                return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Cas des jeux avec un unique exécutable autonome (installation PC
+        /// native, homebrew recompilé...). IsoPath reste vide et
+        /// ArgumentsTemplate est une chaîne vide (pas de jeton {ISO} à
+        /// substituer) : le fichier choisi est lancé tel quel.
+        /// </summary>
+        private UserLibraryEntry PromptForStandaloneExecutable(GameIdentity identity, string title)
+        {
+            PlayniteApi.Dialogs.ShowMessage(
+                $"Select the standalone executable for \"{title}\".",
+                "DiscShelf: standalone executable"
+            );
+
+            string exePath = PlayniteApi.Dialogs.SelectFile("Executable|*.exe");
+
+            if (string.IsNullOrWhiteSpace(exePath))
+            {
+                return null;
+            }
+
+            UserLibraryEntry entry = new UserLibraryEntry
+            {
+                Serial = identity.Serial,
+                IsoPath = string.Empty,
+                EmulatorPath = exePath,
+                ArgumentsTemplate = string.Empty
+            };
+
+            userLibrary.Add(entry);
+
+            AppendUserLibraryEntry(entry);
+
+            logger.Info(
+                $"DiscShelf : exécutable autonome configuré pour {title} ({identity.Serial}) -> {exePath}"
+            );
+
+            return entry;
+        }
+
+
+        /// <summary>
+        /// Cas classique : émulateur séparé + image disque (ISO/BIN/CUE/CHD).
+        /// </summary>
+        private UserLibraryEntry PromptForEmulatorAndIso(GameIdentity identity, string title)
+        {
+            PlayniteApi.Dialogs.ShowMessage(
+                $"To be able to launch \"{title}\" directly from Playnite, please provide:\n"
+                + "  1. the emulator to use (its .exe file)\n"
+                + "  2. the disc image file for this game on your disk\n\n"
+                + "Two file selection windows will open one after another. "
+                + "You can cancel (Cancel button) if you don't want to set up launching "
+                + "right now -- DiscShelf won't ask again for this disc.",
+                "DiscShelf: set up launching"
+            );
+
+            string emulatorPath = PlayniteApi.Dialogs.SelectFile("Emulator executable|*.exe");
+
+            if (string.IsNullOrWhiteSpace(emulatorPath))
+            {
+                return null;
+            }
+
+            PlayniteApi.Dialogs.ShowMessage(
+                $"Now, select the disc image file for \"{title}\" on your disk.",
+                "DiscShelf: disc image file"
+            );
+
+            string isoPath = PlayniteApi.Dialogs.SelectFile(
+                "Disc image|*.iso;*.bin;*.cue;*.chd;*.gdi;*.cdi|ISO|*.iso|BIN/CUE|*.bin;*.cue|CHD|*.chd|GDI (Dreamcast)|*.gdi|CDI (Dreamcast)|*.cdi|All files|*.*"
+            );
+
+            if (string.IsNullOrWhiteSpace(isoPath))
+            {
+                return null;
+            }
+
+            UserLibraryEntry entry = new UserLibraryEntry
+            {
+                Serial = identity.Serial,
+                IsoPath = isoPath,
+                EmulatorPath = emulatorPath,
+                ArgumentsTemplate = "\"{ISO}\""
+            };
+
+            userLibrary.Add(entry);
+
+            AppendUserLibraryEntry(entry);
+
+            logger.Info(
+                $"DiscShelf : émulateur configuré pour {title} ({identity.Serial}) -> {emulatorPath}"
+            );
+
+            return entry;
+        }
+
+
+        private void AppendUserLibraryEntry(UserLibraryEntry entry)
+        {
+            try
+            {
+                Directory.CreateDirectory(GetPluginUserDataPath());
+
+                bool isNewFile = !File.Exists(userLibraryPath);
+
+                using (StreamWriter writer = new StreamWriter(userLibraryPath, append: true, System.Text.Encoding.UTF8))
+                {
+                    if (isNewFile)
+                    {
+                        writer.WriteLine(
+                            "# Format : serial;chemin_iso;chemin_emulateur;arguments (optionnel, {ISO} = chemin de l'image)"
+                        );
+                    }
+
+                    writer.WriteLine($"{entry.Serial};{entry.IsoPath};{entry.EmulatorPath};{entry.ArgumentsTemplate}");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "DiscShelf : erreur pendant l'enregistrement de UserLibrary.csv.");
             }
         }
     }

@@ -50,4 +50,21 @@
     <None Include="Assets\console_return.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Playnite charge l'extension depuis le dossier utilisateur (Roaming),
+       nomme d'apres l'Id du plugin, et NON depuis ce dossier-ci. Sans cette
+       copie, le binaire charge peut rester perime sans qu'aucune erreur ne
+       le signale. -->
+  <Target Name="CopyToPlayniteUserExtensions" AfterTargets="Build">
+    <PropertyGroup>
+      <PlayniteUserExtension>$(AppData)\Playnite\Extensions\f7ba5ce6-190b-47ed-ba0c-59928375d2a1</PlayniteUserExtension>
+    </PropertyGroup>
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+          DestinationFolder="$(PlayniteUserExtension)"
+          Condition="Exists('$(PlayniteUserExtension)')"
+          ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb"
+          DestinationFolder="$(PlayniteUserExtension)"
+          Condition="Exists('$(PlayniteUserExtension)') And Exists('$(OutputPath)$(AssemblyName).pdb')"
+          ContinueOnError="true" />
+  </Target>
 </Project>

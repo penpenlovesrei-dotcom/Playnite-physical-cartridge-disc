@@ -335,16 +335,33 @@ namespace CartridgeShelf
 
                 if (userEntry == null && !isStartup && !declinedEmulatorSetup.Contains(identity.Checksum))
                 {
-                    userEntry = PromptForEmulatorSetup(identity, entry.Title);
-
-                    if (userEntry == null)
+                    // Important : les dialogues WPF (ShowMessage, SelectFile)
+                    // exigent le thread UI (STA). OnCartridgeInserted tourne
+                    // sur le thread d'arrière-plan du watcher -- sans ce
+                    // marshaling, les dialogues échouent silencieusement
+                    // (pas d'exception, retour immédiat comme si annulés).
+                    RunOnUiThread(() =>
                     {
-                        // L'utilisateur a annulé l'un des deux sélecteurs de
-                        // fichier -- on ne redemande plus pour cette
-                        // cartouche pendant le reste de la session, pour ne
-                        // pas harceler à chaque insertion.
-                        declinedEmulatorSetup.Add(identity.Checksum);
-                    }
+                        UserLibraryEntry promptResult = PromptForEmulatorSetup(identity, entry.Title);
+
+                        if (promptResult == null)
+                        {
+                            // L'utilisateur a annulé l'un des sélecteurs de
+                            // fichier -- on ne redemande plus pour cette
+                            // cartouche pendant le reste de la session, pour
+                            // ne pas harceler à chaque insertion.
+                            declinedEmulatorSetup.Add(identity.Checksum);
+                        }
+
+                        CartridgeState.CartridgeInserted = true;
+                        CartridgeState.CurrentTitle = entry.Title;
+                        CartridgeState.CurrentChecksum = identity.Checksum;
+                        CartridgeState.CurrentPlatform = identity.Platform;
+
+                        slotManager.ShowGame(identity, entry, promptResult);
+                    });
+
+                    return;
                 }
 
                 CartridgeState.CartridgeInserted = true;
