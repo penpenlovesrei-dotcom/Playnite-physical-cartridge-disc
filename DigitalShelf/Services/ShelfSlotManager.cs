@@ -60,6 +60,13 @@ namespace DigitalShelf.Services
         private readonly Dictionary<ShelfView, string> coverDbPaths =
             new Dictionary<ShelfView, string>();
 
+        /// <summary>
+        /// Empreinte de l'image source ayant servi à produire chaque copie en
+        /// base, pour détecter son remplacement.
+        /// </summary>
+        private readonly Dictionary<ShelfView, string> coverStamps =
+            new Dictionary<ShelfView, string>();
+
 
         public ShelfSlotManager(
             IPlayniteAPI api,
@@ -171,13 +178,6 @@ namespace DigitalShelf.Services
         /// </summary>
         private string GetCoverDbPath(Game game, ShelfView view)
         {
-            if (coverDbPaths.TryGetValue(view, out string cached) &&
-                !string.IsNullOrEmpty(cached) &&
-                CoverStillExists(cached))
-            {
-                return cached;
-            }
-
             string source = coverSourcePaths[view];
 
             if (string.IsNullOrEmpty(source) || !File.Exists(source))
@@ -187,11 +187,39 @@ namespace DigitalShelf.Services
                 return null;
             }
 
+            string stamp = GetSourceStamp(source);
+
+            // L'empreinte de l'image source fait partie du cache : sans elle,
+            // remplacer un PNG dans Assets restait sans effet, la copie
+            // enregistrée en base étant réutilisée indéfiniment.
+            if (coverDbPaths.TryGetValue(view, out string cached) &&
+                !string.IsNullOrEmpty(cached) &&
+                coverStamps.TryGetValue(view, out string cachedStamp) &&
+                cachedStamp == stamp &&
+                CoverStillExists(cached))
+            {
+                return cached;
+            }
+
+            // L'image a changé : l'ancienne copie en base n'a plus d'usage.
+            if (!string.IsNullOrEmpty(cached))
+            {
+                try
+                {
+                    api.Database.RemoveFile(cached);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "DigitalShelf : suppression de l'ancienne jaquette impossible.");
+                }
+            }
+
             try
             {
                 string dbPath = api.Database.AddFile(source, game.Id);
 
                 coverDbPaths[view] = dbPath;
+                coverStamps[view] = stamp;
 
                 SaveCoverCache();
 
@@ -204,6 +232,26 @@ namespace DigitalShelf.Services
                 logger.Error(ex, $"DigitalShelf : erreur pendant l'enregistrement de la jaquette de la vue {view}.");
 
                 return null;
+            }
+        }
+
+
+        /// <summary>
+        /// Identité de l'image source : date de modification et taille. Deux
+        /// suffisent pour repérer un remplacement, sans le coût d'un calcul
+        /// d'empreinte à chaque bascule.
+        /// </summary>
+        private static string GetSourceStamp(string path)
+        {
+            try
+            {
+                FileInfo info = new FileInfo(path);
+
+                return info.LastWriteTimeUtc.Ticks + ":" + info.Length;
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 
@@ -249,9 +297,22 @@ namespace DigitalShelf.Services
                         continue;
                     }
 
-                    if (Enum.TryParse(parts[0].Trim(), out ShelfView view))
+                    if (!Enum.TryParse(parts[0].Trim(), out ShelfView view))
                     {
-                        coverDbPaths[view] = parts[1].Trim();
+                        continue;
+                    }
+
+                    // Format « vue=chemin|empreinte ». Une entrée sans
+                    // empreinte vient d'une version antérieure : on la laisse
+                    // sans empreinte, ce qui la fera régénérer au prochain
+                    // rendu plutôt que de réafficher une image périmée.
+                    string[] value = parts[1].Trim().Split(new[] { '|' }, 2);
+
+                    coverDbPaths[view] = value[0].Trim();
+
+                    if (value.Length == 2)
+                    {
+                        coverStamps[view] = value[1].Trim();
                     }
                 }
             }
@@ -270,7 +331,9 @@ namespace DigitalShelf.Services
 
                 File.WriteAllLines(
                     Path.Combine(userDataPath, CoverCacheFileName),
-                    coverDbPaths.Select(kv => $"{kv.Key}={kv.Value}").ToArray()
+                    coverDbPaths.Select(kv =>
+                        $"{kv.Key}={kv.Value}|{(coverStamps.ContainsKey(kv.Key) ? coverStamps[kv.Key] : string.Empty)}"
+                    ).ToArray()
                 );
             }
             catch (Exception ex)

@@ -49,6 +49,12 @@ namespace DigitalShelf.Services
         private DateTime navigationMutedUntil = DateTime.MinValue;
 
         /// <summary>
+        /// Durée du silence couvrant le démarrage de Playnite, pendant lequel
+        /// la sélection se met en place sans que l'utilisateur ait navigué.
+        /// </summary>
+        private const int StartupMuteMs = 5000;
+
+        /// <summary>
         /// Fichier de réglage, à la racine du plugin, permettant de changer
         /// les trois sons sans recompiler. Trouver le bon son relève de
         /// l'essai à l'oreille : autant que ce soit une ligne à éditer plutôt
@@ -71,13 +77,22 @@ namespace DigitalShelf.Services
 
         private readonly string audioFolder;
 
+        private readonly IPlayniteAPI api;
+
 
         public TransitionSounds(IPlayniteAPI api, ILogger logger, string pluginFolder)
         {
+            this.api = api;
             this.logger = logger;
             this.pluginFolder = pluginFolder;
 
             audioFolder = ResolveThemeAudioFolder(api);
+
+            // Le silence de démarrage est armé ici, à la construction du
+            // plugin, et non dans OnApplicationStarted : Playnite pose sa
+            // première sélection avant cet événement, ce qui laissait passer
+            // un son de navigation isolé au lancement.
+            MuteNavigationFor(StartupMuteMs);
 
             LoadSettings();
 
@@ -171,7 +186,7 @@ namespace DigitalShelf.Services
 
         /// <summary>
         /// Son de déplacement dans la rangée de jaquettes, ignoré pendant une
-        /// transition.
+        /// transition et hors du mode Fullscreen.
         /// </summary>
         public void PlayNavigation()
         {
@@ -180,7 +195,32 @@ namespace DigitalShelf.Services
                 return;
             }
 
+            // Ce son appartient à l'habillage Fullscreen : le jouer en mode
+            // Desktop n'a pas de sens, l'interface y ayant sa propre logique
+            // sonore. OnGameSelected, lui, se déclenche dans les deux modes.
+            if (!IsFullscreen)
+            {
+                return;
+            }
+
             Play(navigationFile);
+        }
+
+
+        private bool IsFullscreen
+        {
+            get
+            {
+                try
+                {
+                    return api?.ApplicationInfo != null &&
+                           api.ApplicationInfo.Mode == ApplicationMode.Fullscreen;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
 
 

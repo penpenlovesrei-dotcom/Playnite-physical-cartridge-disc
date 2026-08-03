@@ -1,5 +1,13 @@
 AddonId: f7ba5ce6-190b-47ed-ba0c-59928375d2a1
 Packages:
+  - Version: 0.3
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-04
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.5/DigitalShelf-v0.3.pext
+    Changelog:
+      - Le son de navigation ne se joue plus en mode Desktop, où il n'a pas lieu d'être - il appartient à l'habillage Fullscreen.
+      - Plus de son isolé au démarrage de Playnite - le silence couvrant la mise en place de la sélection est désormais armé dès le chargement du plugin.
+      - Remplacer une jaquette dans le dossier Assets est enfin pris en compte - la copie enregistrée en base était réutilisée indéfiniment, quelle que soit l'image source.
   - Version: 0.2
     RequiredApiVersion: 6.16.0
     ReleaseDate: 2026-08-03
