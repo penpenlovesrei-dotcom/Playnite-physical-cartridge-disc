@@ -15,6 +15,6 @@ Packages:
     ReleaseDate: 2026-08-02
     PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.1/DigitalShelf-v0.1.pext
     Changelog:
-      - Version initiale : troisième tuile pour la bibliothèque numérique, aux côtés de DiscShelf et CartridgeShelf.
+      - 'Version initiale : troisième tuile pour la bibliothèque numérique, aux côtés de DiscShelf et CartridgeShelf.'
       - Transition mosaïque façon Super Nintendo entre la vue console et la vue bibliothèque.
       - Sons de navigation configurables.

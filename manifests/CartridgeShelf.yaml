@@ -12,6 +12,6 @@ Packages:
     ReleaseDate: 2026-08-02
     PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.1/CartridgeShelf-v0.1.pext
     Changelog:
-      - Version initiale : identification des cartouches SNES via le lecteur SN Operator (Epilogue), sans OCR.
+      - 'Version initiale : identification des cartouches SNES via le lecteur SN Operator (Epilogue), sans OCR.'
       - Récupération de jaquette via ScreenScraper / libretro-thumbnails / SteamGridDB.
       - Configuration de l'émulateur et de la ROM directement depuis Playnite.
