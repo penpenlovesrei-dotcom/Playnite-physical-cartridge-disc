@@ -1,5 +1,13 @@
 AddonId: 7c3e2d1a-9f61-4c7d-8b4e-123456789abc
 Packages:
+  - Version: 0.4
+    RequiredApiVersion: 6.16.0
+    ReleaseDate: 2026-08-03
+    PackageUrl: https://github.com/penpenlovesrei-dotcom/Playnite-physical-cartridge-disc/releases/download/v0.4/DiscShelf-v0.4.pext
+    Changelog:
+      - 'Correction - le chemin de l''image était passé à l''émulateur sans guillemets : tout jeu dont le chemin contient une espace ne se lançait pas.'
+      - Un disque non configuré propose désormais « Configurer l'émulateur » directement sur sa jaquette. Le bouton d'installation renvoyait jusqu'ici « Fonction d'installation introuvable », sans aucun recours depuis l'interface.
+      - 'Cela couvre les cas où le configurateur restait inatteignable : disque déjà inséré au démarrage de Playnite, configuration annulée une fois, ou chemin d''émulateur devenu invalide.'
   - Version: 0.3
     RequiredApiVersion: 6.16.0
     ReleaseDate: 2026-08-03
